@@ -16,6 +16,13 @@ namespace LiveAndEnvironment
             _mapWidth = width;
             _mapHeight = height;
             Map = new Cell[height, width];
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    Map[i, j] = new Cell(null, j, i);
+                }
+            }
 
             _units = new List<Unit>();
         }
@@ -106,7 +113,9 @@ namespace LiveAndEnvironment
                 if (Map[unit.Cell.Y + dy, unit.Cell.X + dx].Unit == null)
                 {
                     unit.Cell.Unit = null;
-                    Map[unit.Cell.Y + dy, unit.Cell.X + dx].Unit = unit;
+                    unit.Cell = Map[unit.Cell.Y + dy, unit.Cell.X + dx];
+                    unit.Cell.Unit = unit;
+
                 }
                 if (unit.LocalX < 0)
                 {
@@ -141,6 +150,11 @@ namespace LiveAndEnvironment
             EnvironmentDamage();
             UnitsDo();
             MoveUnits();
+        }
+
+        public void AddUnit(Unit unit)
+        {
+            _units.Add(unit);
         }
     }
 }

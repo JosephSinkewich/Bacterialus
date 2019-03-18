@@ -50,9 +50,12 @@ namespace LiveAndEnvironment
 
         public void EnvironmentDamage()
         {
-            double damage = Cell.Environment.Danger;
-            damage *= 1 - Species.Adaptations[Cell.Environment].Resist;
-            Mass -= damage;
+            if (Cell.Environment != null)
+            {
+                double damage = Cell.Environment.Danger;
+                damage *= 1 - Species.Adaptations[Cell.Environment].Resist;
+                Mass -= damage;
+            }
         }
     }
 }

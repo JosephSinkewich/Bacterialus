@@ -50,6 +50,7 @@
     <Compile Include="DisplayBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Camera.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,8 +89,16 @@
     <None Include="default100x100.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FodyWeavers.xml" />
     <Content Include="lox100x100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LiveAndEnvironment\LiveAndEnvironment.csproj">
+      <Project>{34c9512d-bbae-4d48-a32d-a9c1e790a9c8}</Project>
+      <Name>LiveAndEnvironment</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

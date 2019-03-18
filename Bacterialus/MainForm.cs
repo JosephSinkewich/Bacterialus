@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveAndEnvironment;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,69 +13,37 @@ namespace Bacterialus
 {
     public partial class MainForm : Form
     {
-        int _mode = 0;
+        const double ADD_RESOLUTION_COEFFICIENT = 1.2;
+        const double ADD_FRAME_INTERVAL_COEFFICIENT = 1.2;
+
+        const int MIN_FRAME_INTERVAL = 10;
+        const int MAX_FRAME_INTERVAL = 200;
 
         private bool fullScreen;
 
-        private Random _rand;
+        private GameEngine _engine;
 
-        private int _resolution;
-        private Bitmap _canvas;
-        private Bitmap _userDrawing;
-        private Color _color1;
-        private Color _color2;
+        private Camera _camera;
 
-        private int framesProSec;
-
+        private int _framesProSec;
         private int _frameInterval;
 
-        public MainForm(int mode)
+        public MainForm()
         {
-            _mode = mode;
-
             InitializeComponent();
+            fullScreen = false;
 
-            if (mode == 0)
-            {
-                fullScreen = false;
+            _engine = new GameEngine(500, 500);
+            _camera = new Camera(_engine);
 
-                _rand = new Random();
-
-                _resolution = 100;
-
-                _canvas = new Bitmap(_resolution, _resolution);
-                _userDrawing = new Bitmap(_resolution, _resolution);
-                _color1 = Color.Blue;
-                _color2 = Color.Aqua;
-
-                framesProSec = 0;
-
-                _frameInterval = 17;
-            }
-            else
-            {
-                _rand = new Random();
-
-                _resolution = 100;
-
-                _canvas = new Bitmap(_resolution, _resolution);
-                _userDrawing = new Bitmap(_resolution, _resolution);
-                Graphics graphics = Graphics.FromImage(_userDrawing);
-                graphics.DrawImage(Image.FromFile("lox100x100.png"), 0, 0);
-                displayBox1.Image = _canvas;
-                _color1 = Color.Black;
-                _color2 = Color.SeaGreen;
-
-                framesProSec = 0;
-
-                _frameInterval = 17;
-            }
+            _framesProSec = 0;
+            _frameInterval = 17;
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
-            displayBox1.Width = this.Width - 114;
-            displayBox1.Height = this.Height - 90;
+            cameraDisplayBox.Width = this.Width - 209;
+            cameraDisplayBox.Height = this.Height - 90;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -84,56 +53,29 @@ namespace Bacterialus
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            Graphics graphics = displayBox1.CreateGraphics();
+            Graphics graphics = cameraDisplayBox.CreateGraphics();
             graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
             graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
 
-            if (_mode == 1)
-            {
-                humTimer.Start();
-                SetFullScreenMode(true);
-            }
+            resolutionToolStripStatusLabel.Text = _camera.Resolution.ToString();
         }
 
-        private void GenerateHum()
+        private void DrawFrame()
         {
-            int chance = _rand.Next(100);
-            Graphics canvasGraphics = Graphics.FromImage(_canvas);
-            //Console.Beep(37 + chance * 10, _frameInterval);
-            for (int i = 0; i < _resolution; i++)
-            {
-                for (int j = 0; j < _resolution; j++)
-                {
-                    if (_rand.Next(100) <= chance)
-                    {
-                        _canvas.SetPixel(j, i, _color1);
-                    }
-                    else
-                    {
-                        _canvas.SetPixel(j, i, _color2);
-                    }
-                }
-            }
-            canvasGraphics.DrawImage(_userDrawing, 0, 0);
-            framesProSec++;
-            displayBox1.Image = _canvas;
-        }
-
-        private void humTimer_Tick(object sender, EventArgs e)
-        {
-            GenerateHum();
+            _framesProSec++;
+            cameraDisplayBox.Image = _camera.GetFrame();
         }
 
         private void startPauseButton_Click(object sender, EventArgs e)
         {
-            if (humTimer.Enabled)
+            if (simulationTagTimer.Enabled)
             {
-                humTimer.Stop();
+                simulationTagTimer.Stop();
             }
             else
             {
-                humTimer.Start();
+                simulationTagTimer.Start();
             }
         }
 
@@ -141,13 +83,15 @@ namespace Bacterialus
         {
             menuStrip1.Visible = value;
             statusStrip1.Visible = value;
+
             startPauseButton.Visible = value;
+            restartButton.Visible = value;
+
             zoomInbutton.Visible = value;
             zoomOutbutton.Visible = value;
+
             slowestButton.Visible = value;
             fastestButton.Visible = value;
-            colorOneButton.Visible = value;
-            colorTwoButton.Visible = value;
         }
 
         private void SetFullScreenMode(bool value)
@@ -158,14 +102,14 @@ namespace Bacterialus
                 this.WindowState = FormWindowState.Maximized;
                 SetInterfaceVisible(false);
                 this.TopMost = true;
-                displayBox1.Location = new Point(0, 0);
-                displayBox1.Size = new Size(this.Width + 10, this.Height + 5);
+                cameraDisplayBox.Location = new Point(0, 0);
+                cameraDisplayBox.Size = new Size(this.Width + 10, this.Height + 5);
             }
             else
             {
                 this.FormBorderStyle = FormBorderStyle.Sizable;
                 SetInterfaceVisible(true);
-                displayBox1.Location = new Point(13, 28);
+                cameraDisplayBox.Location = new Point(13, 28);
                 this.WindowState = FormWindowState.Normal;
                 this.TopMost = false;
             }
@@ -183,60 +127,74 @@ namespace Bacterialus
             {
                 SetFullScreenMode(true);
             }
-
         }
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            humTimer.Start();
+            simulationTagTimer.Start();
         }
 
         private void SetResolution(int value)
         {
-            _resolution = value;
-            _resolution = Math.Max(1, _resolution);
-            _resolution = Math.Min(512, _resolution);
-            _canvas = new Bitmap(_resolution, _resolution);
-            Bitmap oldDrawing = new Bitmap(_userDrawing);
-            _userDrawing = new Bitmap(_resolution, _resolution);
-            Graphics graphics = Graphics.FromImage(_userDrawing);
-            graphics.DrawImage(oldDrawing, 0, 0);
+            _camera.Resolution = value;
 
-            GenerateHum();
+            resolutionToolStripStatusLabel.Text = _camera.Resolution.ToString();
+
+            DrawFrame();
+        }
+
+        private void AddResolution()
+        {
+            SetResolution((int)(_camera.Resolution * ADD_RESOLUTION_COEFFICIENT));
+        }
+
+        private void SubstractResolution()
+        {
+            SetResolution((int)(_camera.Resolution / ADD_RESOLUTION_COEFFICIENT));
         }
 
         private void ZoomInbutton_Click(object sender, EventArgs e)
         {
-            SetResolution(_resolution / 2);
+            SubstractResolution();
         }
 
         private void ZoomOutbutton_Click(object sender, EventArgs e)
         {
-            SetResolution(_resolution * 2);
+            AddResolution();
         }
 
         private void fpsTimer_Tick(object sender, EventArgs e)
         {
-            toolStripStatusFPSLabel.Text = framesProSec.ToString();
-            framesProSec = 0;
+            toolStripStatusFPSLabel.Text = _framesProSec.ToString();
+            _framesProSec = 0;
         }
 
-        private void SetInterval(int value)
+        private void SetFrameInterval(int value)
         {
-            _frameInterval = value;
-            _frameInterval = Math.Max(10, _frameInterval);
-            _frameInterval = Math.Min(200, _frameInterval);
-            humTimer.Interval = _frameInterval;
+            _frameInterval = Math.Max(MIN_FRAME_INTERVAL, value);
+            _frameInterval = Math.Min(MAX_FRAME_INTERVAL, _frameInterval);
+
+            simulationTagTimer.Interval = _frameInterval;
+        }
+
+        private void AddFrameInterval()
+        {
+            SetFrameInterval((int)(_frameInterval * ADD_FRAME_INTERVAL_COEFFICIENT));
+        }
+
+        private void SubstractFrameInterval()
+        {
+            SetFrameInterval((int)(_frameInterval / ADD_FRAME_INTERVAL_COEFFICIENT));
         }
 
         private void slowestButton_Click(object sender, EventArgs e)
         {
-            SetInterval(_frameInterval * 2);
+            AddFrameInterval();
         }
 
         private void fastestButton_Click(object sender, EventArgs e)
         {
-            SetInterval(_frameInterval / 2);
+            SubstractFrameInterval();
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -257,13 +215,13 @@ namespace Bacterialus
 
             if (e.KeyCode == Keys.Space)
             {
-                if (humTimer.Enabled)
+                if (simulationTagTimer.Enabled)
                 {
-                    humTimer.Stop();
+                    simulationTagTimer.Stop();
                 }
                 else
                 {
-                    humTimer.Start();
+                    simulationTagTimer.Start();
                 }
             }
 
@@ -271,73 +229,57 @@ namespace Bacterialus
             {
                 if (e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
-                    SetResolution(_resolution / 2);
+                    SubstractResolution();
                 }
 
                 if (e.KeyCode == Keys.OemMinus || e.KeyCode == Keys.Subtract)
                 {
-                    SetResolution(_resolution * 2);
+                    AddResolution();
                 }
             }
             else
             {
                 if (e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
-                    SetInterval(_frameInterval / 2);
+                    SubstractFrameInterval();
                 }
 
                 if (e.KeyCode == Keys.OemMinus || e.KeyCode == Keys.Subtract)
                 {
-                    SetInterval(_frameInterval * 2);
+                    AddFrameInterval();
                 }
             }
-
-            if (e.KeyCode == Keys.D1)
-            {
-                colorDialog1.ShowDialog();
-                _color1 = colorDialog1.Color;
-                colorOneButton.ForeColor = _color1;
-            }
-
-            if (e.KeyCode == Keys.D2)
-            {
-                colorDialog1.ShowDialog();
-                _color2 = colorDialog1.Color;
-                colorTwoButton.ForeColor = _color2;
-            }
-        }
-
-        private void colorOneButton_Click(object sender, EventArgs e)
-        {
-            colorDialog1.ShowDialog();
-            _color1 = colorDialog1.Color;
-            colorOneButton.ForeColor = _color1;
-        }
-
-        private void colorTwoButton_Click(object sender, EventArgs e)
-        {
-            colorDialog1.ShowDialog();
-            _color2 = colorDialog1.Color;
-            colorTwoButton.ForeColor = _color2;
         }
 
         private void displayBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            double onePixelWidth = Convert.ToDouble(displayBox1.Width) / _resolution;
-            double onePixelHeight = Convert.ToDouble(displayBox1.Height) / _resolution;
+            double onePixelWidth = Convert.ToDouble(cameraDisplayBox.Width) / _camera.Resolution;
+            double onePixelHeight = Convert.ToDouble(cameraDisplayBox.Height) / _camera.Resolution;
             int imageX = (int)((Convert.ToDouble(e.X) + onePixelWidth / 2) / onePixelWidth);
             int imageY = (int)((Convert.ToDouble(e.Y) + onePixelHeight / 2) / onePixelHeight);
 
-            _userDrawing.SetPixel(imageX, imageY, Color.Black);
+            Species species = new Species("LOX");
+            species.GrowSpeed = 0.1;
+            species.ReproductionMass = 1;
+            species.ReproductionSpeed = 0.5;
+            species.Speed = 1;
 
-            GenerateHum();
+            Unit unit = new Unit(species, _engine.Map[_camera.OffsetY + imageY, _camera.OffsetX + imageX]);
+            _engine.AddUnit(unit);
+
+            _engine.Turn();
+            DrawFrame();
         }
 
-        private void showLoxToolStripMenuItem_Click(object sender, EventArgs e)
+        private void restartButton_Click(object sender, EventArgs e)
         {
-            Graphics graphics = Graphics.FromImage(_userDrawing);
-            graphics.DrawImage(Image.FromFile("lox100x100.png"), 0, 0);
 
+        }
+
+        private void simulationTagTimer_Tick(object sender, EventArgs e)
+        {
+            _engine.Turn();
+            DrawFrame();
         }
     }
 }

@@ -16,21 +16,7 @@ namespace Bacterialus
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            if (args.Length > 0)
-            {
-                try
-                {
-                    Application.Run(new MainForm(Convert.ToInt32(args[0])));
-                }
-                catch
-                {
-
-                }
-            }
-            else
-            {
-                Application.Run(new MainForm(0));
-            }
+            Application.Run(new MainForm());
         }
     }
 }

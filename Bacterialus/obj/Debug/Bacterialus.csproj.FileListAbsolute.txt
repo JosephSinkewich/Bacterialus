@@ -22,3 +22,15 @@ D:\Workshop\source\repos\Bacterialus(Old)\Bacterialus\obj\Debug\Bacterialus.cspr
 D:\Workshop\source\repos\Bacterialus(Old)\Bacterialus\obj\Debug\Bacterialus.csproj.CoreCompileInputs.cache
 D:\Workshop\source\repos\Bacterialus(Old)\Bacterialus\obj\Debug\Bacterialus.exe
 D:\Workshop\source\repos\Bacterialus(Old)\Bacterialus\obj\Debug\Bacterialus.pdb
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.csprojResolveAssemblyReference.cache
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.MainForm.resources
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.Properties.Resources.resources
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.csproj.GenerateResource.Cache
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.csproj.CoreCompileInputs.cache
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.exe
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.pdb
+D:\GitHub\Bacterialus\Bacterialus\bin\Debug\Bacterialus.exe.config
+D:\GitHub\Bacterialus\Bacterialus\bin\Debug\Bacterialus.exe
+D:\GitHub\Bacterialus\Bacterialus\bin\Debug\Bacterialus.pdb
+D:\GitHub\Bacterialus\Bacterialus\bin\Debug\LiveAndEnvironment.dll
+D:\GitHub\Bacterialus\Bacterialus\bin\Debug\LiveAndEnvironment.pdb
