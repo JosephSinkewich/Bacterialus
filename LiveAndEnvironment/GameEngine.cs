@@ -10,6 +10,11 @@ namespace LiveAndEnvironment
         public Cell[,] Map { get; private set; }
         
         List<Unit> _units;
+        List<Unit> _bornUnits;
+
+        Random _random = new Random();
+        
+        const int EVOLUTION_CHANCE = 10;
 
         public GameEngine(int width, int height)
         {
@@ -25,6 +30,7 @@ namespace LiveAndEnvironment
             }
 
             _units = new List<Unit>();
+            _bornUnits = new List<Unit>();
         }
 
         private void GrowUnits()
@@ -43,25 +49,177 @@ namespace LiveAndEnvironment
             }
         }
 
+        private List<Cell> GetCellsAround(Unit unit, double radius)
+        {
+            List<Cell> result = new List<Cell>();
+
+            for (int i = unit.Cell.Y - (int)Math.Round(radius); i <= unit.Cell.Y + (int)Math.Round(radius); i++)
+            {
+                if (i >= 0 && i < _mapHeight)
+                {
+                    for (int j = unit.Cell.X - (int)Math.Round(radius); j <= unit.Cell.X + (int)Math.Round(radius); j++)
+                    {
+                        if (j >= 0 && j < _mapWidth)
+                        {
+                            if (Math.Pow(unit.Cell.X - j, 2) + Math.Pow(unit.Cell.Y - i, 2) <= radius * radius)
+                            {
+                                result.Add(Map[i, j]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void BornUnit(Unit parent)
+        {
+            List<Cell> cellsAround = GetCellsAround(parent, 1.45);
+            List<Cell> freeCells = new List<Cell>();
+
+            foreach (var item in cellsAround)
+            {
+                if (item.Unit == null)
+                {
+                    freeCells.Add(item);
+                }
+            }
+
+            if (freeCells.Count > 0)
+            {
+                Cell bornCell = freeCells[_random.Next(freeCells.Count)];
+                Species species = parent.Species;
+
+                if (_random.Next(EVOLUTION_CHANCE) == EVOLUTION_CHANCE / 2)
+                {
+                    species = species.Evolve();
+                }
+                Unit newUnit = new Unit(species, bornCell);
+                _bornUnits.Add(newUnit);
+
+                parent.State = UnitState.Wander;
+                parent.Mass -= newUnit.Mass;
+                parent.ReproductionProgress -= parent.Species.ReproductionMass;
+            }
+            else
+            {
+                parent.CannotBornTimes++;
+                if (parent.CannotBornTimes >= 3)//reborn
+                {
+                    Species species = parent.Species;
+
+                    if (_random.Next(EVOLUTION_CHANCE) == EVOLUTION_CHANCE / 2)
+                    {
+                        species = species.Evolve();
+                    }
+
+                    Unit newUnit = new Unit(species, parent.Cell);
+                    _bornUnits.Add(newUnit);
+
+                    parent.State = UnitState.Wander;
+                    parent.Mass = -1;
+                    parent.ReproductionProgress = 0;
+                }
+            }
+        }
+
         private void UnitsDo()
         {
-            Random rand = new Random();
-
             foreach (var unit in _units)
             {
-                if (unit.State == UnitState.Moving)
-                {
-                    double direction = rand.NextDouble() * 360;
-                    double dx = unit.Species.Speed * Math.Cos(direction);
-                    double dy = unit.Species.Speed * Math.Sin(direction);
+                List<Cell> sensoredCells = GetCellsAround(unit, unit.Species.SensorRadius);
+                Cell target = null;
 
+                if (unit.State == UnitState.Reproduction)
+                {
+                    if (unit.Mass < unit.Species.ReproductionMass)
+                    {
+                        unit.ReproductionProgress = 0;
+                        unit.State = UnitState.Wander;
+                    }
+                }
+                if (unit.Mass >= unit.Species.ReproductionMass)
+                {
+                    unit.State = UnitState.Reproduction;
+                }
+
+                if (unit.State == UnitState.Wander)
+                {
+                    double targetDistance = double.MaxValue;
+                    foreach (var item in sensoredCells)
+                    {
+                        if (item.Unit != null && item.Unit.Species != unit.Species)
+                        {
+                            if (unit.Species.FoodList.Contains(item.Unit.Species.FoodType))
+                            {
+                                double distance = Math.Pow(unit.Cell.X - item.X, 2) + Math.Pow(unit.Cell.Y - item.Y, 2);
+                                if (distance < targetDistance)
+                                {
+                                    target = item;
+                                    targetDistance = distance;
+                                }
+                            }
+                        }
+                    }
+
+                    double direction;
+                    if (target != null)
+                    {
+                        direction = Math.Atan2(unit.Cell.Y - target.Y, target.X - unit.Cell.X);
+                    }
+                    else
+                    {
+                        direction = _random.NextDouble() * Math.PI * 2;
+                    }
+
+                    double dx = unit.Species.Speed * Math.Cos(direction);
+                    double dy = unit.Species.Speed * -Math.Sin(direction);
                     unit.LocalX += dx;
                     unit.LocalY += dy;
                 }
                 else if (unit.State == UnitState.Reproduction)
                 {
-
+                    if (unit.ReproductionProgress >= unit.Species.ReproductionMass)
+                    {
+                        BornUnit(unit);
+                    }
+                    else //reproduction in progress
+                    {
+                        unit.ReproductionProgress += unit.Species.ReproductionSpeed;
+                    }
                 }
+
+                List<Cell> EatRangeCells = GetCellsAround(unit, 1.45);
+                if (EatRangeCells.Contains(target))//Attack
+                {
+                    unit.Attack(target.Unit);
+                }
+            }
+
+            _units.AddRange(_bornUnits);
+            _bornUnits.Clear();
+        }
+
+        private void DieUnits()
+        {
+            List<Unit> deadList = new List<Unit>();
+            foreach (var unit in _units)
+            {
+                if (unit.IsLive == false)
+                {
+                    deadList.Add(unit);
+                }
+            }
+            foreach (var dead in deadList)
+            {
+                _units.Remove(dead);
+                if (dead.Cell.Unit == dead)
+                {
+                    dead.Cell.Unit = null;
+                }
+                dead.Species.DecrementLiveBeing();
+                dead.Species.CheckExtinction();
             }
         }
 
@@ -84,7 +242,7 @@ namespace LiveAndEnvironment
                 {
                     dy = -1;
                 }
-                if (unit.LocalY > 0)
+                if (unit.LocalY > 1)
                 {
                     dy = 1;
                 }
@@ -104,7 +262,7 @@ namespace LiveAndEnvironment
                     dy = 0;
                     unit.LocalY = 0;
                 }
-                if (unit.Cell.Y + dy > -_mapHeight)
+                if (unit.Cell.Y + dy >= _mapHeight)
                 {
                     dy = 0;
                     unit.LocalY = 1;
@@ -149,6 +307,7 @@ namespace LiveAndEnvironment
             GrowUnits();
             EnvironmentDamage();
             UnitsDo();
+            DieUnits();
             MoveUnits();
         }
 

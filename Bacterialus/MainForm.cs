@@ -27,17 +27,31 @@ namespace Bacterialus
 
         private int _framesProSec;
         private int _frameInterval;
+        
+        Species _lox;
 
         public MainForm()
         {
             InitializeComponent();
             fullScreen = false;
 
-            _engine = new GameEngine(500, 500);
+            _engine = new GameEngine(100, 100);
             _camera = new Camera(_engine);
 
             _framesProSec = 0;
             _frameInterval = 17;
+
+            new FoodType("A");
+            new FoodType("B");
+            new FoodType("C");
+
+            _lox = new Species("LOX", FoodType.AllFoodTypes[0]);
+            _lox.GrowSpeed = 0.002;
+            _lox.EatSpeed = 0.5;
+            _lox.ReproductionMass = 1;
+            _lox.ReproductionSpeed = 1.1;
+            _lox.Speed = 1;
+            _lox.SensorRadius = 3;
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -85,6 +99,7 @@ namespace Bacterialus
             statusStrip1.Visible = value;
 
             startPauseButton.Visible = value;
+            turnButton.Visible = value;
             restartButton.Visible = value;
 
             zoomInbutton.Visible = value;
@@ -92,6 +107,8 @@ namespace Bacterialus
 
             slowestButton.Visible = value;
             fastestButton.Visible = value;
+
+            minimapDisplayBox.Visible = value;
         }
 
         private void SetFullScreenMode(bool value)
@@ -251,32 +268,51 @@ namespace Bacterialus
             }
         }
 
+        private Point GetImageCoords(int width, int height, int resolution,  int mouseX, int mouseY)
+        {
+            double onePixelWidth = Convert.ToDouble(width) / resolution;
+            double onePixelHeight = Convert.ToDouble(height) / resolution;
+            int imageX = (int)((Convert.ToDouble(mouseX) + onePixelWidth / 2) / onePixelWidth);
+            int imageY = (int)((Convert.ToDouble(mouseY) + onePixelHeight / 2) / onePixelHeight);
+
+            return new Point(imageX, imageY);
+        }
+
         private void displayBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            double onePixelWidth = Convert.ToDouble(cameraDisplayBox.Width) / _camera.Resolution;
-            double onePixelHeight = Convert.ToDouble(cameraDisplayBox.Height) / _camera.Resolution;
-            int imageX = (int)((Convert.ToDouble(e.X) + onePixelWidth / 2) / onePixelWidth);
-            int imageY = (int)((Convert.ToDouble(e.Y) + onePixelHeight / 2) / onePixelHeight);
+            Point point = GetImageCoords(cameraDisplayBox.Width, cameraDisplayBox.Height, 
+                _camera.Resolution, e.X, e.Y);
 
-            Species species = new Species("LOX");
-            species.GrowSpeed = 0.1;
-            species.ReproductionMass = 1;
-            species.ReproductionSpeed = 0.5;
-            species.Speed = 1;
+            if (e.Button == MouseButtons.Left)
+            {
+                Unit unit = new Unit(_lox, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
+                _engine.AddUnit(unit);
+            }
 
-            Unit unit = new Unit(species, _engine.Map[_camera.OffsetY + imageY, _camera.OffsetX + imageX]);
-            _engine.AddUnit(unit);
-
-            _engine.Turn();
             DrawFrame();
         }
 
         private void restartButton_Click(object sender, EventArgs e)
         {
-
+            _engine = new GameEngine(100, 100);
+            _camera = new Camera(_engine);
         }
 
         private void simulationTagTimer_Tick(object sender, EventArgs e)
+        {
+            _engine.Turn();
+            DrawFrame();
+        }
+
+        private void cameraDisplayBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point point = GetImageCoords(cameraDisplayBox.Width, cameraDisplayBox.Height,
+                _camera.Resolution, e.X, e.Y);
+
+            coordsToolStripStatusLabel.Text = point.ToString();
+        }
+
+        private void turnButton_Click(object sender, EventArgs e)
         {
             _engine.Turn();
             DrawFrame();

@@ -63,7 +63,7 @@ namespace Bacterialus
         {
             Engine = engine;
 
-            Resolution = engine.Map.GetLength(0) / 2;
+            Resolution = engine.Map.GetLength(0);
 
             OffsetX = 0;
             OffsetY = 0;
@@ -116,7 +116,7 @@ namespace Bacterialus
             {
                 for (int j = 0; j < Resolution && j + OffsetX < Engine.Map.GetLength(1); j++)
                 {
-                    frame.SetPixel(i, j, Color.Black);
+                    frame.SetPixel(j, i, Color.Black);
 
                     if (Engine.Map[i + OffsetY, j + OffsetX].Unit != null)
                     {
@@ -127,7 +127,7 @@ namespace Bacterialus
                             SpeciesColors.Add(species, GetRandomColor());
                         }
 
-                        frame.SetPixel(i, j, SpeciesColors[Engine.Map[i + OffsetY, j + OffsetX].Unit.Species]);
+                        frame.SetPixel(j, i, SpeciesColors[Engine.Map[i + OffsetY, j + OffsetX].Unit.Species]);
                     }
                     else if (Engine.Map[i + OffsetY, j + OffsetX].Environment != null)
                     {
@@ -138,7 +138,7 @@ namespace Bacterialus
                             EnvironmentColors.Add(environmentType, GetRandomColor());
                         }
 
-                        frame.SetPixel(i, j, EnvironmentColors[Engine.Map[i + OffsetY, j + OffsetX].Environment.Type]);
+                        frame.SetPixel(j, i, EnvironmentColors[Engine.Map[i + OffsetY, j + OffsetX].Environment.Type]);
                     }
                 }
             }
