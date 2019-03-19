@@ -63,7 +63,7 @@ namespace Bacterialus
         {
             Engine = engine;
 
-            Resolution = engine.Map.GetLength(0) / 2;
+            Resolution = engine.Map.GetLength(0);
 
             OffsetX = 0;
             OffsetY = 0;

@@ -27,10 +27,8 @@ namespace Bacterialus
 
         private int _framesProSec;
         private int _frameInterval;
-
-        Species lox;
-        Species pidr;
-        Species mudak;
+        
+        Species _lox;
 
         public MainForm()
         {
@@ -43,33 +41,17 @@ namespace Bacterialus
             _framesProSec = 0;
             _frameInterval = 17;
 
-            lox = new Species("LOX");
-            lox.GrowSpeed = 0.01;
-            lox.EatSpeed = 0.2;
-            lox.ReproductionMass = 1;
-            lox.ReproductionSpeed = 0.5;
-            lox.Speed = 1;
-            lox.SensorRadius = 1;
-            
-            pidr = new Species("PIDR");
-            pidr.GrowSpeed = 0.001;
-            pidr.EatSpeed = 0.5;
-            pidr.ReproductionMass = 1;
-            pidr.ReproductionSpeed = 1.1;
-            pidr.Speed = 1.5;
-            pidr.SensorRadius = 3;
+            new FoodType("A");
+            new FoodType("B");
+            new FoodType("C");
 
-            mudak = new Species("MUDAK");
-            mudak.GrowSpeed = 0.001;
-            mudak.EatSpeed = 0.5;
-            mudak.ReproductionMass = 1;
-            mudak.ReproductionSpeed = 0.5;
-            mudak.Speed = 1.2;
-            mudak.SensorRadius = 5;
-
-            lox.EatList.Add(mudak);
-            pidr.EatList.Add(lox);
-            mudak.EatList.Add(pidr);
+            _lox = new Species("LOX", FoodType.AllFoodTypes[0]);
+            _lox.GrowSpeed = 0.002;
+            _lox.EatSpeed = 0.5;
+            _lox.ReproductionMass = 1;
+            _lox.ReproductionSpeed = 1.1;
+            _lox.Speed = 1;
+            _lox.SensorRadius = 3;
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -117,6 +99,7 @@ namespace Bacterialus
             statusStrip1.Visible = value;
 
             startPauseButton.Visible = value;
+            turnButton.Visible = value;
             restartButton.Visible = value;
 
             zoomInbutton.Visible = value;
@@ -124,6 +107,8 @@ namespace Bacterialus
 
             slowestButton.Visible = value;
             fastestButton.Visible = value;
+
+            minimapDisplayBox.Visible = value;
         }
 
         private void SetFullScreenMode(bool value)
@@ -300,17 +285,7 @@ namespace Bacterialus
 
             if (e.Button == MouseButtons.Left)
             {
-                Unit unit = new Unit(lox, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
-                _engine.AddUnit(unit);
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                Unit unit = new Unit(pidr, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
-                _engine.AddUnit(unit);
-            }
-            else
-            {
-                Unit unit = new Unit(mudak, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
+                Unit unit = new Unit(_lox, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
                 _engine.AddUnit(unit);
             }
 

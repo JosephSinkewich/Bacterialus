@@ -6,7 +6,6 @@
         Reproduction,
         Stay,
         
-        Save, // run away from terrible bacteries
         SearchEnvironment
     }
 }

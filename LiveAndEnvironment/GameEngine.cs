@@ -13,16 +13,8 @@ namespace LiveAndEnvironment
         List<Unit> _bornUnits;
 
         Random _random = new Random();
-
-        #region(Evolve constants)
-        const int EVOLUTION_CHANCE = 1000;
-        const double INFLUENCE_MAX_EVOLVE = 0.1;
-        const double SPEED_MAX_EVOLVE = 0.1;
-        const double REPRODUCTION_SPEED_MAX_EVOLVE = 0.4;
-        const double EAT_SPEED_MAX_EVOLVE = 0.3;
-        const double REPRODUCTION_MASS_MAX_EVOLVE = 0.2;
-        const double SENSOR_MAX_EVOLVE = 0.2;
-        #endregion
+        
+        const int EVOLUTION_CHANCE = 10;
 
         public GameEngine(int width, int height)
         {
@@ -81,126 +73,6 @@ namespace LiveAndEnvironment
             return result;
         }
 
-        public Species Evolve(Species parent)
-        {
-            Species descendant = new Species(parent);
-            
-            bool addSomething = Convert.ToBoolean(_random.Next(2));
-
-            int propertyNumber = _random.Next(11);
-
-            if (propertyNumber == 0)//Adaptations
-            {
-                if (EnvironmentType.AllEnvironments.Count > 0)
-                {
-                    EnvironmentType environmentType =
-                        EnvironmentType.AllEnvironments[_random.Next(EnvironmentType.AllEnvironments.Count)];
-                    double influence = _random.NextDouble() * INFLUENCE_MAX_EVOLVE;
-                    if (!addSomething)
-                    {
-                        influence = -influence;
-                    }
-
-                    Adaptation adaptation = new Adaptation(environmentType, influence);
-                    descendant.AddAdaptation(adaptation);
-                }
-            }
-            else if (propertyNumber == 1)//Speed
-            {
-                if (addSomething)
-                {
-                    descendant.Speed += _random.NextDouble() * SPEED_MAX_EVOLVE;
-                }
-                else
-                {
-                    descendant.Speed -= _random.NextDouble() * SPEED_MAX_EVOLVE;
-                }
-            }
-            else if (propertyNumber == 2)//EatList
-            {
-                if (addSomething)
-                {
-                    Species food = null;
-                    food = Species.AllLiveSpecies[_random.Next(Species.AllLiveSpecies.Count)];
-                    if (food != descendant)
-                    {
-                        descendant.EatList.Add(food);
-                    }
-                }
-                else
-                {
-                    Species speciesToDelete = null;
-                    foreach (var item in descendant.EatList)
-                    {
-                        if (_random.Next(descendant.EatList.Count) == 0)
-                        {
-                            speciesToDelete = item;
-                            break;
-                        }
-                    }
-                    descendant.EatList.Remove(speciesToDelete);
-                }
-            }
-            else if (propertyNumber == 4)//ReproductionSpeed
-            {
-                if (addSomething)
-                {
-                    descendant.ReproductionSpeed += _random.NextDouble() * REPRODUCTION_SPEED_MAX_EVOLVE;
-                }
-                else
-                {
-                    descendant.ReproductionSpeed -= _random.NextDouble() * REPRODUCTION_SPEED_MAX_EVOLVE;
-                }
-            }
-            else if (propertyNumber == 5)//Mass
-            {
-                if (addSomething)
-                {
-                    descendant.ReproductionMass += _random.NextDouble() * REPRODUCTION_MASS_MAX_EVOLVE;
-                }
-                else
-                {
-                    descendant.ReproductionMass -= _random.NextDouble() * REPRODUCTION_MASS_MAX_EVOLVE;
-                }
-            }
-            else if (propertyNumber == 6)//Behavior
-            {
-                //may be later
-            }
-            else if (propertyNumber == 7)//DangerList
-            {
-                //may be later
-            }
-            else if (propertyNumber == 8)//SensorRadius
-            {
-                if (addSomething)
-                {
-                    descendant.SensorRadius += _random.NextDouble() * SENSOR_MAX_EVOLVE;
-                }
-                else
-                {
-                    descendant.SensorRadius -= _random.NextDouble() * SENSOR_MAX_EVOLVE;
-                }
-            }
-            else if (propertyNumber == 9)//FavorEnvironments
-            {
-                //may be later
-            }
-            else if (propertyNumber == 10)//EatSpeed
-            {
-                if (addSomething)
-                {
-                    descendant.EatSpeed += _random.NextDouble() * EAT_SPEED_MAX_EVOLVE;
-                }
-                else
-                {
-                    descendant.EatSpeed -= _random.NextDouble() * EAT_SPEED_MAX_EVOLVE;
-                }
-            }
-
-            return descendant;
-        }
-
         private void BornUnit(Unit parent)
         {
             List<Cell> cellsAround = GetCellsAround(parent, 1.45);
@@ -221,7 +93,7 @@ namespace LiveAndEnvironment
 
                 if (_random.Next(EVOLUTION_CHANCE) == EVOLUTION_CHANCE / 2)
                 {
-                    species = Evolve(species);
+                    species = species.Evolve();
                 }
                 Unit newUnit = new Unit(species, bornCell);
                 _bornUnits.Add(newUnit);
@@ -233,12 +105,21 @@ namespace LiveAndEnvironment
             else
             {
                 parent.CannotBornTimes++;
-                if (parent.CannotBornTimes >= 3)
+                if (parent.CannotBornTimes >= 3)//reborn
                 {
-                    parent.ReproductionProgress = 0;
+                    Species species = parent.Species;
+
+                    if (_random.Next(EVOLUTION_CHANCE) == EVOLUTION_CHANCE / 2)
+                    {
+                        species = species.Evolve();
+                    }
+
+                    Unit newUnit = new Unit(species, parent.Cell);
+                    _bornUnits.Add(newUnit);
+
                     parent.State = UnitState.Wander;
-                    parent.Mass -= parent.Species.ReproductionMass;
-                    parent.CannotBornTimes = 0;
+                    parent.Mass = -1;
+                    parent.ReproductionProgress = 0;
                 }
             }
         }
@@ -268,9 +149,9 @@ namespace LiveAndEnvironment
                     double targetDistance = double.MaxValue;
                     foreach (var item in sensoredCells)
                     {
-                        if (item.Unit != null)
+                        if (item.Unit != null && item.Unit.Species != unit.Species)
                         {
-                            if (unit.Species.EatList.Contains(item.Unit.Species))
+                            if (unit.Species.FoodList.Contains(item.Unit.Species.FoodType))
                             {
                                 double distance = Math.Pow(unit.Cell.X - item.X, 2) + Math.Pow(unit.Cell.Y - item.Y, 2);
                                 if (distance < targetDistance)
@@ -286,10 +167,6 @@ namespace LiveAndEnvironment
                     if (target != null)
                     {
                         direction = Math.Atan2(unit.Cell.Y - target.Y, target.X - unit.Cell.X);
-                        if (target.X < unit.Cell.X)
-                        {
-                            direction = direction + Math.PI;
-                        }
                     }
                     else
                     {
@@ -316,15 +193,8 @@ namespace LiveAndEnvironment
                 List<Cell> EatRangeCells = GetCellsAround(unit, 1.45);
                 if (EatRangeCells.Contains(target))//Attack
                 {
-                    double attack = unit.Species.EatSpeed - target.Unit.Species.Defence;
-                    if (attack > 0)
-                    {
-                        double damage = Math.Min(target.Unit.Mass, attack);
-                        target.Unit.Mass -= attack;
-                        unit.Mass += damage;
-                    }
+                    unit.Attack(target.Unit);
                 }
-
             }
 
             _units.AddRange(_bornUnits);
@@ -344,7 +214,12 @@ namespace LiveAndEnvironment
             foreach (var dead in deadList)
             {
                 _units.Remove(dead);
-                dead.Cell.Unit = null;
+                if (dead.Cell.Unit == dead)
+                {
+                    dead.Cell.Unit = null;
+                }
+                dead.Species.DecrementLiveBeing();
+                dead.Species.CheckExtinction();
             }
         }
 
