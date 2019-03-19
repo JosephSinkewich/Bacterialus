@@ -19,6 +19,8 @@ namespace LiveAndEnvironment
 
         public double ReproductionProgress { get; set; }
         
+        public int CannotBornTimes { get; set; }
+
         public bool IsLive
         {
             get
@@ -35,12 +37,18 @@ namespace LiveAndEnvironment
         {
             LocalX = 0.5;
             LocalY = 0.5;
+
             Cell = cell;
+            Cell.Unit = this;
 
             Species = species;
+            Species.IncrementLiveBeing();
+
             Mass = Species.ReproductionMass / 2.0;
 
             State = UnitState.Wander;
+
+            CannotBornTimes = 0;
         }
 
         public void Grow()
@@ -52,9 +60,9 @@ namespace LiveAndEnvironment
         {
             if (Cell.Environment != null)
             {
-                double damage = Cell.Environment.Danger;
-                damage *= 1 - Species.Adaptations[Cell.Environment].Resist;
-                Mass -= damage;
+                double resultInfluence = Cell.Environment.Concentration;
+                resultInfluence *= Species.Adaptations[Cell.Environment.Type].Influence;
+                Mass += resultInfluence;
             }
         }
     }

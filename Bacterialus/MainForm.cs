@@ -28,16 +28,48 @@ namespace Bacterialus
         private int _framesProSec;
         private int _frameInterval;
 
+        Species lox;
+        Species pidr;
+        Species mudak;
+
         public MainForm()
         {
             InitializeComponent();
             fullScreen = false;
 
-            _engine = new GameEngine(500, 500);
+            _engine = new GameEngine(100, 100);
             _camera = new Camera(_engine);
 
             _framesProSec = 0;
             _frameInterval = 17;
+
+            lox = new Species("LOX");
+            lox.GrowSpeed = 0.01;
+            lox.EatSpeed = 0.2;
+            lox.ReproductionMass = 1;
+            lox.ReproductionSpeed = 0.5;
+            lox.Speed = 1;
+            lox.SensorRadius = 1;
+            
+            pidr = new Species("PIDR");
+            pidr.GrowSpeed = 0.001;
+            pidr.EatSpeed = 0.5;
+            pidr.ReproductionMass = 1;
+            pidr.ReproductionSpeed = 1.1;
+            pidr.Speed = 1.5;
+            pidr.SensorRadius = 3;
+
+            mudak = new Species("MUDAK");
+            mudak.GrowSpeed = 0.001;
+            mudak.EatSpeed = 0.5;
+            mudak.ReproductionMass = 1;
+            mudak.ReproductionSpeed = 0.5;
+            mudak.Speed = 1.2;
+            mudak.SensorRadius = 5;
+
+            lox.EatList.Add(mudak);
+            pidr.EatList.Add(lox);
+            mudak.EatList.Add(pidr);
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -266,22 +298,28 @@ namespace Bacterialus
             Point point = GetImageCoords(cameraDisplayBox.Width, cameraDisplayBox.Height, 
                 _camera.Resolution, e.X, e.Y);
 
-            Species species = new Species("LOX");
-            species.GrowSpeed = 0.01;
-            species.ReproductionMass = 1;
-            species.ReproductionSpeed = 0.5;
-            species.Speed = 1;
+            if (e.Button == MouseButtons.Left)
+            {
+                Unit unit = new Unit(lox, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
+                _engine.AddUnit(unit);
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                Unit unit = new Unit(pidr, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
+                _engine.AddUnit(unit);
+            }
+            else
+            {
+                Unit unit = new Unit(mudak, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
+                _engine.AddUnit(unit);
+            }
 
-            Unit unit = new Unit(species, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
-            _engine.AddUnit(unit);
-
-            _engine.Turn();
             DrawFrame();
         }
 
         private void restartButton_Click(object sender, EventArgs e)
         {
-            _engine = new GameEngine(500, 500);
+            _engine = new GameEngine(100, 100);
             _camera = new Camera(_engine);
         }
 

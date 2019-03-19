@@ -5,8 +5,7 @@
         Wander,
         Reproduction,
         Stay,
-
-        Hunt,
+        
         Save, // run away from terrible bacteries
         SearchEnvironment
     }

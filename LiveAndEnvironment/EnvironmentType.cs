@@ -13,6 +13,9 @@ namespace LiveAndEnvironment
         public EnvironmentType(string name)
         {
             Name = name;
+            AllEnvironments.Add(this);
         }
+
+        public static List<EnvironmentType> AllEnvironments { get; set; } = new List<EnvironmentType>();
     }
 }

@@ -9,12 +9,12 @@ namespace LiveAndEnvironment
     public class Adaptation
     {
         public EnvironmentType Environment { get; private set; }
-        public double Resist { get; private set; }
+        public double Influence { get; set; }
 
-        public Adaptation(EnvironmentType environment, double resist)
+        public Adaptation(EnvironmentType environment, double influence)
         {
             Environment = environment;
-            Resist = resist;
+            Influence = influence;
         }
     }
 }
