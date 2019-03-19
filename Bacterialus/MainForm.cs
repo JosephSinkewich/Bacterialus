@@ -251,20 +251,28 @@ namespace Bacterialus
             }
         }
 
+        private Point GetImageCoords(int width, int height, int resolution,  int mouseX, int mouseY)
+        {
+            double onePixelWidth = Convert.ToDouble(width) / resolution;
+            double onePixelHeight = Convert.ToDouble(height) / resolution;
+            int imageX = (int)((Convert.ToDouble(mouseX) + onePixelWidth / 2) / onePixelWidth);
+            int imageY = (int)((Convert.ToDouble(mouseY) + onePixelHeight / 2) / onePixelHeight);
+
+            return new Point(imageX, imageY);
+        }
+
         private void displayBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            double onePixelWidth = Convert.ToDouble(cameraDisplayBox.Width) / _camera.Resolution;
-            double onePixelHeight = Convert.ToDouble(cameraDisplayBox.Height) / _camera.Resolution;
-            int imageX = (int)((Convert.ToDouble(e.X) + onePixelWidth / 2) / onePixelWidth);
-            int imageY = (int)((Convert.ToDouble(e.Y) + onePixelHeight / 2) / onePixelHeight);
+            Point point = GetImageCoords(cameraDisplayBox.Width, cameraDisplayBox.Height, 
+                _camera.Resolution, e.X, e.Y);
 
             Species species = new Species("LOX");
-            species.GrowSpeed = 0.1;
+            species.GrowSpeed = 0.01;
             species.ReproductionMass = 1;
             species.ReproductionSpeed = 0.5;
             species.Speed = 1;
 
-            Unit unit = new Unit(species, _engine.Map[_camera.OffsetY + imageY, _camera.OffsetX + imageX]);
+            Unit unit = new Unit(species, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
             _engine.AddUnit(unit);
 
             _engine.Turn();
@@ -273,10 +281,25 @@ namespace Bacterialus
 
         private void restartButton_Click(object sender, EventArgs e)
         {
-
+            _engine = new GameEngine(500, 500);
+            _camera = new Camera(_engine);
         }
 
         private void simulationTagTimer_Tick(object sender, EventArgs e)
+        {
+            _engine.Turn();
+            DrawFrame();
+        }
+
+        private void cameraDisplayBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point point = GetImageCoords(cameraDisplayBox.Width, cameraDisplayBox.Height,
+                _camera.Resolution, e.X, e.Y);
+
+            coordsToolStripStatusLabel.Text = point.ToString();
+        }
+
+        private void turnButton_Click(object sender, EventArgs e)
         {
             _engine.Turn();
             DrawFrame();

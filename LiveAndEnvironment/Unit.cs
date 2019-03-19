@@ -18,7 +18,7 @@ namespace LiveAndEnvironment
         public UnitState State { get; set; }
 
         public double ReproductionProgress { get; set; }
-
+        
         public bool IsLive
         {
             get
@@ -38,9 +38,9 @@ namespace LiveAndEnvironment
             Cell = cell;
 
             Species = species;
-            Mass = Species.ReproductionMass / 2;
+            Mass = Species.ReproductionMass / 2.0;
 
-            State = UnitState.Moving;
+            State = UnitState.Wander;
         }
 
         public void Grow()

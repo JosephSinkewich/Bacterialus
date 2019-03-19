@@ -89,9 +89,6 @@
     <None Include="default100x100.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lox100x100.png" />
-  </ItemGroup>
-  <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
