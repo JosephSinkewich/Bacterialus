@@ -7,6 +7,7 @@ namespace LiveAndEnvironment
     {
         public string Name { get; set; }
         public FoodType FoodType { get; set; }
+        public Species Parent { get; private set; }
 
         public Dictionary<EnvironmentType, Adaptation> Adaptations { get; set; }
 
@@ -43,6 +44,7 @@ namespace LiveAndEnvironment
         {
             Name = name;
             FoodType = foodType;
+            Parent = null;
 
             Adaptations = new Dictionary<EnvironmentType, Adaptation>();
 
@@ -69,6 +71,7 @@ namespace LiveAndEnvironment
         {
             Name = parent.Name + "descendant";
             FoodType = parent.FoodType;
+            Parent = parent;
             
             Adaptations = new Dictionary<EnvironmentType, Adaptation>(parent.Adaptations);
             

@@ -59,6 +59,10 @@ namespace Bacterialus
             }
         }
 
+        const int COLOR_CHANGE_MIN = -50;
+        const int COLOR_CHANGE_MAX = 50;
+        const int MIN_COLOR_DIFFERENT = 60;
+
         public Camera(GameEngine engine)
         {
             Engine = engine;
@@ -84,7 +88,7 @@ namespace Bacterialus
             OffsetY = OffsetY + dy;
         }
 
-        private Color GetRandomColor()
+        private Color GetRandomBrightColor()
         {
             Random rand = new Random();
             int r = rand.Next(256);
@@ -103,6 +107,41 @@ namespace Bacterialus
             else if (baseColor == 2)
             {
                 b = 255;
+            }
+
+            return Color.FromArgb(r, g, b);
+        }
+
+        public Color GetDescendantColor(Color parentColor)
+        {
+            int colorDifferent = 0;
+            Random rand = new Random();
+            int r = 0;
+            int g = 0;
+            int b = 0;
+            while (colorDifferent < MIN_COLOR_DIFFERENT)
+            {
+                r = Math.Max(parentColor.R + rand.Next(COLOR_CHANGE_MIN, COLOR_CHANGE_MAX + 1), 0);
+                r = Math.Min(r, 255);
+                g = Math.Max(parentColor.G + rand.Next(COLOR_CHANGE_MIN, COLOR_CHANGE_MAX + 1), 0);
+                g = Math.Min(g, 255);
+                b = Math.Max(parentColor.B + rand.Next(COLOR_CHANGE_MIN, COLOR_CHANGE_MAX + 1), 0);
+                b = Math.Min(b, 255);
+
+                if (r >= g && r >= b)
+                {
+                    r = 255;
+                }
+                else if (g >= r && g >= b)
+                {
+                    g = 255;
+                }
+                else if (b >= r && b >= g)
+                {
+                    b = 255;
+                }
+
+                colorDifferent = Math.Abs(parentColor.R - r) + Math.Abs(parentColor.G - g) + Math.Abs(parentColor.B - b);
             }
             
             return Color.FromArgb(r, g, b);
@@ -124,7 +163,14 @@ namespace Bacterialus
 
                         if (!SpeciesColors.ContainsKey(species))
                         {
-                            SpeciesColors.Add(species, GetRandomColor());
+                            if (species.Parent == null)
+                            {
+                                SpeciesColors.Add(species, GetRandomBrightColor());
+                            }
+                            else
+                            {
+                                SpeciesColors.Add(species, GetDescendantColor(SpeciesColors[species.Parent]));
+                            }
                         }
 
                         frame.SetPixel(j, i, SpeciesColors[Engine.Map[i + OffsetY, j + OffsetX].Unit.Species]);
@@ -135,7 +181,7 @@ namespace Bacterialus
 
                         if (!EnvironmentColors.ContainsKey(environmentType))
                         {
-                            EnvironmentColors.Add(environmentType, GetRandomColor());
+                            EnvironmentColors.Add(environmentType, GetRandomBrightColor());
                         }
 
                         frame.SetPixel(j, i, EnvironmentColors[Engine.Map[i + OffsetY, j + OffsetX].Environment.Type]);
