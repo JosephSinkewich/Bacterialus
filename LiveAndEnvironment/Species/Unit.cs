@@ -68,7 +68,7 @@ namespace LiveAndEnvironment
 
         public void Attack(Unit target)
         {
-            double attack = Species.EatSpeed - target.Species.Defence;
+            double attack = Species.EatSpeed - target.Species.Defense;
             if (attack > 0)
             {
                 double damage = Math.Min(target.Mass, attack);

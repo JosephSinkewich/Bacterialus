@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace LiveAndEnvironment
 {
@@ -15,7 +16,7 @@ namespace LiveAndEnvironment
 
         public HashSet<FoodType> FoodList { get; set; }
         public double EatSpeed { get; set; }
-        public double Defence { get; set; }
+        public double Defense { get; set; }
         public double GrowSpeed { get; set; }
 
         public double ReproductionMass { get; set; }
@@ -29,14 +30,23 @@ namespace LiveAndEnvironment
         public double SensorRadius { get; set; }
 
         private int _countLiveBeings;
+        public int Population
+        {
+            get
+            {
+                return _countLiveBeings;
+            }
+        }
 
         #region(Evolve constants)
         const double INFLUENCE_MAX_EVOLVE = 0.1;
         const double SPEED_MAX_EVOLVE = 0.1;
         const double REPRODUCTION_SPEED_MAX_EVOLVE = 0.4;
         const double EAT_SPEED_MAX_EVOLVE = 0.1;
+        const double DEFENSE_MAX_EVOLVE = 0.05;
         const double REPRODUCTION_MASS_MAX_EVOLVE = 0.2;
         const double SENSOR_MAX_EVOLVE = 0.2;
+        const double GROW_SPEED_MAX_EVOLVE = 0.002;
         #endregion
 
         #region(constructors)
@@ -51,7 +61,7 @@ namespace LiveAndEnvironment
             Speed = 0;
 
             FoodList = new HashSet<FoodType>();
-            Defence = 0;
+            Defense = 0;
             GrowSpeed = 0;
 
             ReproductionMass = 0;
@@ -69,16 +79,17 @@ namespace LiveAndEnvironment
 
         public Species(Species parent)
         {
-            Name = parent.Name + "descendant";
+            Name = parent.Name;
             FoodType = parent.FoodType;
             Parent = parent;
-            
+
             Adaptations = new Dictionary<EnvironmentType, Adaptation>(parent.Adaptations);
-            
+
             Speed = parent.Speed;
 
             FoodList = new HashSet<FoodType>(parent.FoodList);
-            Defence = parent.Defence;
+            EatSpeed = parent.EatSpeed;
+            Defense = parent.Defense;
             GrowSpeed = parent.GrowSpeed;
 
             ReproductionMass = parent.ReproductionMass;
@@ -107,14 +118,38 @@ namespace LiveAndEnvironment
             }
         }
 
+        private string EvolveName(string name, bool addSomething)
+        {
+            Random rand = new Random();
+            if (addSomething || name.Length == 1)
+            {
+                char newChar = '0';
+                if (rand.Next(2) == 0)
+                {
+                    newChar = Convert.ToChar(rand.Next(65, 91));
+                }
+                else
+                {
+                    newChar = Convert.ToChar(rand.Next(97, 123));
+                }
+                return name + newChar;
+            }
+            else
+            {
+                return name.Remove(rand.Next(name.Length), 1);
+            }
+        }
+
         public Species Evolve()
         {
             Random random = new Random();
-            Species descendant = new Species(this);
 
             bool addSomething = Convert.ToBoolean(random.Next(2));
 
-            int propertyNumber = random.Next(12);
+            int propertyNumber = random.Next(10);
+
+            Species descendant = new Species(this);
+            descendant.Name = EvolveName(descendant.Name,  addSomething);
 
             if (propertyNumber == 0)//Adaptations
             {
@@ -143,7 +178,7 @@ namespace LiveAndEnvironment
                     descendant.Speed -= random.NextDouble() * SPEED_MAX_EVOLVE;
                 }
             }
-            else if (propertyNumber == 2 || propertyNumber == 6 || propertyNumber == 7 || propertyNumber == 9)//EatList
+            else if (propertyNumber == 2)//EatList
             {
                 if (addSomething)
                 {
@@ -165,7 +200,7 @@ namespace LiveAndEnvironment
                     descendant.FoodList.Remove(foodToDelete);
                 }
             }
-            else if (propertyNumber == 4)//ReproductionSpeed
+            else if (propertyNumber == 3)//ReproductionSpeed
             {
                 if (addSomething)
                 {
@@ -176,7 +211,7 @@ namespace LiveAndEnvironment
                     descendant.ReproductionSpeed -= random.NextDouble() * REPRODUCTION_SPEED_MAX_EVOLVE;
                 }
             }
-            else if (propertyNumber == 5)//Mass
+            else if (propertyNumber == 4)//Mass
             {
                 if (addSomething)
                 {
@@ -187,15 +222,7 @@ namespace LiveAndEnvironment
                     descendant.ReproductionMass -= random.NextDouble() * REPRODUCTION_MASS_MAX_EVOLVE;
                 }
             }
-            else if (propertyNumber == 6)//Behavior
-            {
-                //may be later
-            }
-            else if (propertyNumber == 7)//DangerList
-            {
-                //may be later
-            }
-            else if (propertyNumber == 8)//SensorRadius
+            else if (propertyNumber == 5)//SensorRadius
             {
                 if (addSomething)
                 {
@@ -206,11 +233,7 @@ namespace LiveAndEnvironment
                     descendant.SensorRadius -= random.NextDouble() * SENSOR_MAX_EVOLVE;
                 }
             }
-            else if (propertyNumber == 9)//FavorEnvironments
-            {
-                //may be later
-            }
-            else if (propertyNumber == 10)//EatSpeed
+            else if (propertyNumber == 6)//EatSpeed
             {
                 if (addSomething)
                 {
@@ -221,9 +244,39 @@ namespace LiveAndEnvironment
                     descendant.EatSpeed -= random.NextDouble() * EAT_SPEED_MAX_EVOLVE;
                 }
             }
-            else if (propertyNumber == 11)//ChangeFoodType
+            else if (propertyNumber == 7)//ChangeFoodType
             {
-                descendant.FoodType = FoodType.AllFoodTypes[random.Next(FoodType.AllFoodTypes.Count)];
+                if (random.Next(FoodType.AllFoodTypes.Count * 3) != 0)
+                {
+                    int foodTypeNumber = random.Next(FoodType.AllFoodTypes.Count);
+                    descendant.FoodType = FoodType.AllFoodTypes[foodTypeNumber];
+                }
+                else
+                {
+                    descendant.FoodType = new FoodType(EvolveName(descendant.FoodType.Name, Convert.ToBoolean(random.Next(2))));
+                }
+            }
+            else if (propertyNumber == 8)//Defense
+            {
+                if (addSomething)
+                {
+                    descendant.Defense += random.NextDouble() * DEFENSE_MAX_EVOLVE;
+                }
+                else
+                {
+                    descendant.Defense -= random.NextDouble() * DEFENSE_MAX_EVOLVE;
+                }
+            }
+            else if (propertyNumber == 9)//GrowSpeed
+            {
+                if (addSomething)
+                {
+                    descendant.GrowSpeed += random.NextDouble() * GROW_SPEED_MAX_EVOLVE;
+                }
+                else
+                {
+                    descendant.GrowSpeed -= random.NextDouble() * GROW_SPEED_MAX_EVOLVE;
+                }
             }
 
             return descendant;

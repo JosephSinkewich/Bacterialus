@@ -34,3 +34,4 @@ D:\GitHub\Bacterialus\Bacterialus\bin\Debug\Bacterialus.exe
 D:\GitHub\Bacterialus\Bacterialus\bin\Debug\Bacterialus.pdb
 D:\GitHub\Bacterialus\Bacterialus\bin\Debug\LiveAndEnvironment.dll
 D:\GitHub\Bacterialus\Bacterialus\bin\Debug\LiveAndEnvironment.pdb
+D:\GitHub\Bacterialus\Bacterialus\obj\Debug\Bacterialus.SpeciesForm.resources

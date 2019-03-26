@@ -1,13 +1,9 @@
 ﻿using LiveAndEnvironment;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Bacterialus
 {
@@ -30,6 +26,9 @@ namespace Bacterialus
         
         Species _lox;
 
+        private int _saveCounter;
+        private int _saveTicks;
+
         public MainForm()
         {
             InitializeComponent();
@@ -41,17 +40,18 @@ namespace Bacterialus
             _framesProSec = 0;
             _frameInterval = 17;
 
-            new FoodType("A");
-            new FoodType("B");
-            new FoodType("C");
+            new FoodType("A0");
 
             _lox = new Species("LOX", FoodType.AllFoodTypes[0]);
-            _lox.GrowSpeed = 0.002;
-            _lox.EatSpeed = 0.5;
+            _lox.GrowSpeed = 0.003;
+            _lox.EatSpeed = 0.15;
             _lox.ReproductionMass = 1;
             _lox.ReproductionSpeed = 1.1;
             _lox.Speed = 1;
             _lox.SensorRadius = 3;
+
+            _saveCounter = 0;
+            _saveTicks = 1;
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -78,7 +78,16 @@ namespace Bacterialus
         private void DrawFrame()
         {
             _framesProSec++;
-            cameraDisplayBox.Image = _camera.GetFrame();
+            Bitmap frame = _camera.GetFrame();
+            cameraDisplayBox.Image = frame;
+
+            _saveTicks++;
+            if (_saveTicks % 100 == 0)
+            {
+                _saveTicks = 1;
+                frame.Save("papka/frame" + _saveCounter + ".png", ImageFormat.Png);
+                _saveCounter++;
+            }
         }
 
         private void startPauseButton_Click(object sender, EventArgs e)
@@ -118,7 +127,6 @@ namespace Bacterialus
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.WindowState = FormWindowState.Maximized;
                 SetInterfaceVisible(false);
-                this.TopMost = true;
                 cameraDisplayBox.Location = new Point(0, 0);
                 cameraDisplayBox.Size = new Size(this.Width + 10, this.Height + 5);
             }
@@ -128,7 +136,6 @@ namespace Bacterialus
                 SetInterfaceVisible(true);
                 cameraDisplayBox.Location = new Point(13, 28);
                 this.WindowState = FormWindowState.Normal;
-                this.TopMost = false;
             }
 
             fullScreen = value;
@@ -229,8 +236,7 @@ namespace Bacterialus
                     SetFullScreenMode(true);
                 }
             }
-
-            if (e.KeyCode == Keys.Space)
+            else if (e.KeyCode == Keys.Space)
             {
                 if (simulationTagTimer.Enabled)
                 {
@@ -240,6 +246,10 @@ namespace Bacterialus
                 {
                     simulationTagTimer.Start();
                 }
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                ToNormalState();
             }
 
             if (e.Control)
@@ -266,6 +276,8 @@ namespace Bacterialus
                     AddFrameInterval();
                 }
             }
+
+            
         }
 
         private Point GetImageCoords(int width, int height, int resolution,  int mouseX, int mouseY)
@@ -288,6 +300,16 @@ namespace Bacterialus
                 Unit unit = new Unit(_lox, _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X]);
                 _engine.AddUnit(unit);
             }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (_engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X].Unit != null)
+                {
+                    Species species = _engine.Map[_camera.OffsetY + point.Y, _camera.OffsetX + point.X].Unit.Species;
+
+                    SpeciesForm speciesForm = new SpeciesForm(species, _camera);
+                    speciesForm.Show();
+                }
+            }
 
             DrawFrame();
         }
@@ -302,6 +324,7 @@ namespace Bacterialus
         {
             _engine.Turn();
             DrawFrame();
+            
         }
 
         private void cameraDisplayBox_MouseMove(object sender, MouseEventArgs e)
@@ -316,6 +339,46 @@ namespace Bacterialus
         {
             _engine.Turn();
             DrawFrame();
+        }
+
+        private void MainForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Left)
+            {
+                _camera.MoveOffset(-_camera.Resolution / 5, 0);
+            }
+            else if (e.KeyCode == Keys.Right)
+            {
+                _camera.MoveOffset(_camera.Resolution / 5, 0);
+            }
+            else if (e.KeyCode == Keys.Up)
+            {
+                _camera.MoveOffset(0, -_camera.Resolution / 5);
+            }
+            else if (e.KeyCode == Keys.Down)
+            {
+                _camera.MoveOffset(0, _camera.Resolution / 5);
+            }
+
+            DrawFrame();
+        }
+
+        private void ToNormalState()
+        {
+            SetFullScreenMode(false);
+
+            this.Width = 509;
+            this.Height = 334;
+
+            _camera.Resolution = _engine.Map.GetLength(0);
+            _camera.Move(0, 0);
+
+            DrawFrame();
+        }
+
+        private void toNormalStateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToNormalState();
         }
     }
 }

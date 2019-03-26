@@ -149,7 +149,7 @@ namespace LiveAndEnvironment
                     double targetDistance = double.MaxValue;
                     foreach (var item in sensoredCells)
                     {
-                        if (item.Unit != null && item.Unit.Species != unit.Species)
+                        if (item.Unit != null)
                         {
                             if (unit.Species.FoodList.Contains(item.Unit.Species.FoodType))
                             {

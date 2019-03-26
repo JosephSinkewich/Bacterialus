@@ -16,6 +16,11 @@ namespace LiveAndEnvironment
             AllFoodTypes.Add(this);
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public static List<FoodType> AllFoodTypes { get; set; } = new List<FoodType>();
     }
 }

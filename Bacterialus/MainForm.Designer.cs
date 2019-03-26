@@ -50,9 +50,10 @@
             this.slowestButton = new System.Windows.Forms.Button();
             this.fastestButton = new System.Windows.Forms.Button();
             this.restartButton = new System.Windows.Forms.Button();
+            this.turnButton = new System.Windows.Forms.Button();
             this.minimapDisplayBox = new Bacterialus.DisplayBox();
             this.cameraDisplayBox = new Bacterialus.DisplayBox();
-            this.turnButton = new System.Windows.Forms.Button();
+            this.toNormalStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.minimapDisplayBox)).BeginInit();
@@ -66,7 +67,7 @@
             this.windowToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(801, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(501, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -96,7 +97,8 @@
             // windowToolStripMenuItem
             // 
             this.windowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fullScreenToolStripMenuItem});
+            this.fullScreenToolStripMenuItem,
+            this.toNormalStateToolStripMenuItem});
             this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
             this.windowToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.windowToolStripMenuItem.Text = "Window";
@@ -104,14 +106,14 @@
             // fullScreenToolStripMenuItem
             // 
             this.fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
-            this.fullScreenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.fullScreenToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.fullScreenToolStripMenuItem.Text = "FullScreen";
             this.fullScreenToolStripMenuItem.Click += new System.EventHandler(this.fullScreenToolStripMenuItem_Click);
             // 
             // startPauseButton
             // 
             this.startPauseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.startPauseButton.Location = new System.Drawing.Point(619, 28);
+            this.startPauseButton.Location = new System.Drawing.Point(319, 28);
             this.startPauseButton.Name = "startPauseButton";
             this.startPauseButton.Size = new System.Drawing.Size(75, 23);
             this.startPauseButton.TabIndex = 2;
@@ -130,7 +132,7 @@
             this.coordsToolStripStatusLabel});
             this.statusStrip1.Location = new System.Drawing.Point(0, 283);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(801, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(501, 22);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -173,7 +175,7 @@
             // zoomInbutton
             // 
             this.zoomInbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.zoomInbutton.Location = new System.Drawing.Point(619, 86);
+            this.zoomInbutton.Location = new System.Drawing.Point(319, 86);
             this.zoomInbutton.Name = "zoomInbutton";
             this.zoomInbutton.Size = new System.Drawing.Size(75, 23);
             this.zoomInbutton.TabIndex = 4;
@@ -184,7 +186,7 @@
             // zoomOutbutton
             // 
             this.zoomOutbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.zoomOutbutton.Location = new System.Drawing.Point(619, 115);
+            this.zoomOutbutton.Location = new System.Drawing.Point(319, 115);
             this.zoomOutbutton.Name = "zoomOutbutton";
             this.zoomOutbutton.Size = new System.Drawing.Size(75, 23);
             this.zoomOutbutton.TabIndex = 5;
@@ -206,7 +208,7 @@
             // slowestButton
             // 
             this.slowestButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.slowestButton.Location = new System.Drawing.Point(714, 86);
+            this.slowestButton.Location = new System.Drawing.Point(414, 86);
             this.slowestButton.Name = "slowestButton";
             this.slowestButton.Size = new System.Drawing.Size(75, 23);
             this.slowestButton.TabIndex = 8;
@@ -217,7 +219,7 @@
             // fastestButton
             // 
             this.fastestButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.fastestButton.Location = new System.Drawing.Point(714, 115);
+            this.fastestButton.Location = new System.Drawing.Point(414, 115);
             this.fastestButton.Name = "fastestButton";
             this.fastestButton.Size = new System.Drawing.Size(75, 23);
             this.fastestButton.TabIndex = 9;
@@ -228,7 +230,7 @@
             // restartButton
             // 
             this.restartButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.restartButton.Location = new System.Drawing.Point(714, 39);
+            this.restartButton.Location = new System.Drawing.Point(414, 39);
             this.restartButton.Name = "restartButton";
             this.restartButton.Size = new System.Drawing.Size(75, 23);
             this.restartButton.TabIndex = 10;
@@ -236,11 +238,22 @@
             this.restartButton.UseVisualStyleBackColor = true;
             this.restartButton.Click += new System.EventHandler(this.restartButton_Click);
             // 
+            // turnButton
+            // 
+            this.turnButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.turnButton.Location = new System.Drawing.Point(320, 58);
+            this.turnButton.Name = "turnButton";
+            this.turnButton.Size = new System.Drawing.Size(75, 23);
+            this.turnButton.TabIndex = 12;
+            this.turnButton.Text = "Turn";
+            this.turnButton.UseVisualStyleBackColor = true;
+            this.turnButton.Click += new System.EventHandler(this.turnButton_Click);
+            // 
             // minimapDisplayBox
             // 
             this.minimapDisplayBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.minimapDisplayBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.minimapDisplayBox.Location = new System.Drawing.Point(620, 145);
+            this.minimapDisplayBox.Location = new System.Drawing.Point(320, 145);
             this.minimapDisplayBox.Name = "minimapDisplayBox";
             this.minimapDisplayBox.Size = new System.Drawing.Size(169, 130);
             this.minimapDisplayBox.TabIndex = 11;
@@ -251,30 +264,26 @@
             this.cameraDisplayBox.Image = global::Bacterialus.Properties.Resources.default100x100;
             this.cameraDisplayBox.Location = new System.Drawing.Point(13, 28);
             this.cameraDisplayBox.Name = "cameraDisplayBox";
-            this.cameraDisplayBox.Size = new System.Drawing.Size(600, 247);
+            this.cameraDisplayBox.Size = new System.Drawing.Size(300, 247);
             this.cameraDisplayBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.cameraDisplayBox.TabIndex = 7;
             this.cameraDisplayBox.TabStop = false;
             this.cameraDisplayBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.displayBox1_MouseClick);
             this.cameraDisplayBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.cameraDisplayBox_MouseMove);
             // 
-            // turnButton
+            // toNormalStateToolStripMenuItem
             // 
-            this.turnButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.turnButton.Location = new System.Drawing.Point(620, 58);
-            this.turnButton.Name = "turnButton";
-            this.turnButton.Size = new System.Drawing.Size(75, 23);
-            this.turnButton.TabIndex = 12;
-            this.turnButton.Text = "Turn";
-            this.turnButton.UseVisualStyleBackColor = true;
-            this.turnButton.Click += new System.EventHandler(this.turnButton_Click);
+            this.toNormalStateToolStripMenuItem.Name = "toNormalStateToolStripMenuItem";
+            this.toNormalStateToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.toNormalStateToolStripMenuItem.Text = "To Normal State";
+            this.toNormalStateToolStripMenuItem.Click += new System.EventHandler(this.toNormalStateToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(801, 305);
+            this.ClientSize = new System.Drawing.Size(501, 305);
             this.Controls.Add(this.turnButton);
             this.Controls.Add(this.minimapDisplayBox);
             this.Controls.Add(this.restartButton);
@@ -289,9 +298,10 @@
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "TechnoFire";
+            this.Text = "Bacterialus";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -329,6 +339,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel coordsToolStripStatusLabel;
         private System.Windows.Forms.Button turnButton;
+        private System.Windows.Forms.ToolStripMenuItem toNormalStateToolStripMenuItem;
     }
 }
 

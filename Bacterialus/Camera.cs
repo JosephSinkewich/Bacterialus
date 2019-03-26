@@ -5,7 +5,7 @@ using LiveAndEnvironment;
 
 namespace Bacterialus
 {
-    class Camera
+    public class Camera
     {
         const int RESOLUTION_MIN = 10;
         const int RESOLUTION_MAX = 512;
@@ -59,9 +59,10 @@ namespace Bacterialus
             }
         }
 
-        const int COLOR_CHANGE_MIN = -50;
-        const int COLOR_CHANGE_MAX = 50;
-        const int MIN_COLOR_DIFFERENT = 60;
+        const int COLOR_CHANGE_MIN = -70;
+        const int COLOR_CHANGE_MAX = 70;
+        const int MIN_COLOR_DIFFERENT = 120;
+        const int BASE_COLOR_MIN = 180;
 
         public Camera(GameEngine engine)
         {
@@ -95,18 +96,17 @@ namespace Bacterialus
             int g = rand.Next(256);
             int b = rand.Next(256);
 
-            int baseColor = rand.Next(3);
-            if (baseColor == 0)
+            if (r >= g && r >= b)
             {
-                r = 255;
+                r = Math.Max(r, BASE_COLOR_MIN);
             }
-            else if (baseColor == 1)
+            else if (g >= r && g >= b)
             {
-                g = 255;
+                g = Math.Max(g, BASE_COLOR_MIN);
             }
-            else if (baseColor == 2)
+            else if (b >= r && b >= g)
             {
-                b = 255;
+                b = Math.Max(b, BASE_COLOR_MIN);
             }
 
             return Color.FromArgb(r, g, b);
@@ -130,15 +130,15 @@ namespace Bacterialus
 
                 if (r >= g && r >= b)
                 {
-                    r = 255;
+                    r = Math.Max(r, BASE_COLOR_MIN);
                 }
                 else if (g >= r && g >= b)
                 {
-                    g = 255;
+                    g = Math.Max(g, BASE_COLOR_MIN);
                 }
                 else if (b >= r && b >= g)
                 {
-                    b = 255;
+                    b = Math.Max(b, BASE_COLOR_MIN);
                 }
 
                 colorDifferent = Math.Abs(parentColor.R - r) + Math.Abs(parentColor.G - g) + Math.Abs(parentColor.B - b);
@@ -155,36 +155,46 @@ namespace Bacterialus
             {
                 for (int j = 0; j < Resolution && j + OffsetX < Engine.Map.GetLength(1); j++)
                 {
-                    frame.SetPixel(j, i, Color.Black);
-
-                    if (Engine.Map[i + OffsetY, j + OffsetX].Unit != null)
+                    if (i + OffsetY >= 0 && i + OffsetY < Engine.Map.GetLength(0) &&
+                        j + OffsetX >= 0 && j + OffsetX < Engine.Map.GetLength(1))
                     {
-                        Species species = Engine.Map[i + OffsetY, j + OffsetX].Unit.Species;
-
-                        if (!SpeciesColors.ContainsKey(species))
+                        frame.SetPixel(j, i, Color.Black);
+                        if (Engine.Map[i + OffsetY, j + OffsetX].Unit != null)
                         {
-                            if (species.Parent == null)
+                            Species species = Engine.Map[i + OffsetY, j + OffsetX].Unit.Species;
+
+                            if (!SpeciesColors.ContainsKey(species))
                             {
-                                SpeciesColors.Add(species, GetRandomBrightColor());
+                                if (species.Parent != null)
+                                {
+                                    if (SpeciesColors.ContainsKey(species.Parent))
+                                    {
+                                        SpeciesColors.Add(species, GetDescendantColor(SpeciesColors[species.Parent]));
+                                    }
+                                    else
+                                    {
+                                        SpeciesColors.Add(species, GetRandomBrightColor());
+                                    }
+                                }
+                                else
+                                {
+                                    SpeciesColors.Add(species, GetRandomBrightColor());
+                                }
                             }
-                            else
-                            {
-                                SpeciesColors.Add(species, GetDescendantColor(SpeciesColors[species.Parent]));
-                            }
+
+                            frame.SetPixel(j, i, SpeciesColors[Engine.Map[i + OffsetY, j + OffsetX].Unit.Species]);
                         }
-
-                        frame.SetPixel(j, i, SpeciesColors[Engine.Map[i + OffsetY, j + OffsetX].Unit.Species]);
-                    }
-                    else if (Engine.Map[i + OffsetY, j + OffsetX].Environment != null)
-                    {
-                        EnvironmentType environmentType = Engine.Map[i + OffsetY, j + OffsetX].Environment.Type;
-
-                        if (!EnvironmentColors.ContainsKey(environmentType))
+                        else if (Engine.Map[i + OffsetY, j + OffsetX].Environment != null)
                         {
-                            EnvironmentColors.Add(environmentType, GetRandomBrightColor());
-                        }
+                            EnvironmentType environmentType = Engine.Map[i + OffsetY, j + OffsetX].Environment.Type;
 
-                        frame.SetPixel(j, i, EnvironmentColors[Engine.Map[i + OffsetY, j + OffsetX].Environment.Type]);
+                            if (!EnvironmentColors.ContainsKey(environmentType))
+                            {
+                                EnvironmentColors.Add(environmentType, GetRandomBrightColor());
+                            }
+
+                            frame.SetPixel(j, i, EnvironmentColors[Engine.Map[i + OffsetY, j + OffsetX].Environment.Type]);
+                        }
                     }
                 }
             }
